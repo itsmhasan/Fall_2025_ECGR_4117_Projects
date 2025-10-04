@@ -14,7 +14,7 @@ batch_size = 1  # Batch Size Of Neural Network
 NumClasses = 1  # Output Size
 
 ############################################# FOR STUDENTS #####################################
-
+# git test
 NumEpochs = 25      # How many full passes (epochs) will be made over the training Data
 HiddenSize = 10     # number of neurons in the hidden layer
 
