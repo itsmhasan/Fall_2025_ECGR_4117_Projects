@@ -5,6 +5,7 @@ import pdb
 import numpy as np
 from PreProcessing import PreprocessData
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 # Set Seeds For Randomness
 torch.manual_seed(10)
@@ -14,7 +15,7 @@ batch_size = 1  # Batch Size Of Neural Network
 NumClasses = 1  # Output Size
 
 ############################################# FOR STUDENTS #####################################
-# git test
+
 NumEpochs = 25      # How many full passes (epochs) will be made over the training Data
 HiddenSize = 10     # number of neurons in the hidden layer
 
@@ -72,6 +73,7 @@ optimizer = optim.SGD(net.parameters(), lr=1e-6) ###### Define The Optimizer Her
 if __name__ == "__main__":
 
     TrainSize, SensorNNData, SensorNNLabels = PreprocessData()
+    epoch_losses = []
     for j in range(NumEpochs):
         losses = 0
         for i in range(TrainSize):
@@ -87,3 +89,14 @@ if __name__ == "__main__":
 
         print('Epoch %d, Loss: %.4f' % (j + 1, losses / SensorNNData.shape[0]))
         torch.save(net.state_dict(), './SavedNets/NNBot.pkl')
+        epoch_losses.append(losses / SensorNNData.shape[0])
+
+        plt.figure()
+        plt.plot(range(1, len(epoch_losses) + 1), epoch_losses, marker='o')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss (MSE)')
+        plt.title('Training Loss vs Epoch (lr = 1e-6)')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
