@@ -12,6 +12,8 @@ import numpy as np
 from MakeItLearn import *
 import sys
 
+GOAL = (520, 520)  # target waypoint
+
 width = 600  # Width Of The Game Window
 height = 600  # Height Of The Game Window
 pygame.init()
@@ -155,7 +157,7 @@ class BotEnv:
             self.Bot.velocity = BotSpeed / 2 * BotDirection
         ## If Action Is Straight
         elif action == 5:
-            PlannedAngle = self.PlanAngle(self.Bot.position, (600, 600))
+            PlannedAngle = self.PlanAngle(self.Bot.position, GOAL)
             move_sign = 0
             x1, y1 = PointsFromAngle(self.Bot.angle)
             x2, y2 = PointsFromAngle(PlannedAngle)
@@ -289,6 +291,53 @@ class BotEnv:
 
 
 if __name__ == "__main__":
+    random.seed(10)
+    env = BotEnv()  # keeps walls and rendering as-is
+    env._step(5)
+
+    # Four starting poses: (x, y, theta)
+    poses = [
+        (100, 100, math.pi / 2),  # Pose 1
+        (100, 300, math.pi / 2),  # Pose 2
+        (100, 450, math.pi / 2),  # Pose 3
+        (500, 50, 20)  # Pose 4
+    ]
+
+
+    def reached_goal(pos, tol=15):
+        # simple proximity check to (520, 520)
+        return abs(pos[0] - GOAL[0]) <= tol and abs(pos[1] - GOAL[1]) <= tol
+
+
+    for idx, (x0, y0, th0) in enumerate(poses, start=1):
+        # reset bot pose
+        env.Bot.position = Vec2d(x0, y0)
+        env.Bot.angle = th0
+        env.crashed = False
+        env.DetectCrash = 0
+
+        # run until goal or budget reached
+        max_steps = 3000
+        for step in range(max_steps):
+            if reached_goal(env.Bot.position):
+                print(f"Pose {idx}: MISSION COMPLETE at step {step}")
+                break
+
+            # reuse your existing logic:
+            # if the model flags a pending crash, turn to the flagged side a few frames
+            if env.DetectCrash > 0:
+                side = env.DetectCrash  # 3 = left, 4 = right in your code
+                for _ in range(10):
+                    env._step(side)
+            else:
+                # '5' = go-straight behavior; now steers toward GOAL via PlanAngle()
+                env._step(5)
+        else:
+            print(f"Pose {idx}: Did not reach goal within {max_steps} steps.")
+
+
+
+    '''
     env = BotEnv()
     random.seed(10)
     env._step(5)
@@ -305,3 +354,30 @@ if __name__ == "__main__":
             else:
                 x = 5
                 env._step(x)
+    
+    # ------------------------ Part 2 -------------
+    env = BotEnv()
+    random.seed(10)
+    env.Bot.position = Vec2d(260, 300)
+    env.Bot.angle = math.pi / 2
+    x, y = env.Bot.position  ## Get The Bot Position
+    env.DrawEverything()
+    SensorsData = env.AllSensorSensorsData(x, y, env.Bot.angle)  ## Get All The Sensor Data
+    model = Net(InputSize, NumClasses)
+    model.load_state_dict(torch.load('./SavedNets/NNBot.pkl'))
+    SensorsData = env.AllSensorSensorsData(x, y, env.Bot.angle)  ## Get All The Sensor Data
+    NormalizedSensorsData = [(x - 100.0) / 100.0 for x in SensorsData]  ## Normalize The Sensor Values
+    state = np.array([NormalizedSensorsData])
+    SensorsData = np.append(SensorsData, math.degrees(env.Bot.angle))
+    SensorsData = np.append(SensorsData, [0])
+    # print(SensorsData[:-2])  ## Print The Sensor Data
+    DataTensor = torch.Tensor(SensorsData[:-1]).view(1, -1)
+    if (model != None):
+        ## Get Decision From Neural Network If There Is A Collison
+        DetectCrash = model(Variable(DataTensor))
+        DetectCrash = abs(np.round(DetectCrash.data[0][0]))
+    if DetectCrash == 1:
+        print("Yes, a pending crash event is detected!")
+    else:
+        print("No, a pending crash event is not detected!")
+    '''

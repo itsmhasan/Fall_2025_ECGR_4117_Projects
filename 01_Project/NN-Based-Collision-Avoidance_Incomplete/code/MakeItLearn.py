@@ -17,7 +17,7 @@ NumClasses = 1  # Output Size
 ############################################# FOR STUDENTS #####################################
 
 NumEpochs = 25      # How many full passes (epochs) will be made over the training Data
-HiddenSize = 10     # number of neurons in the hidden layer
+HiddenSize = 50     # number of neurons in the hidden layer
 
 # Create The Neural Network Model
 # Net function is simple 2-layer feed-forward neural network.
