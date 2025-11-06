@@ -27,7 +27,6 @@ import helpers
 from neural_network_framework import FullyConnectedNetwork
 
 
-
 '''Global Variables'''
 learning_rate = .0001
 sample_size_drop = 60

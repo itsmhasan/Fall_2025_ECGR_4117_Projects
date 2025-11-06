@@ -1,0 +1,7 @@
+# pytorch. see https://pytorch.org/
+#these are the packages you might need if you don't have them installed already
+numpy
+sklearn  # pip install scikit-learn
+pillow
+torchvision
+pyglet~=1.5.27  ## any version >2.0 will throw error for rendering.py
